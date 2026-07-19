@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NÓ — Pedido confirmado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1B1812;
+    --surface: #262119;
+    --line: #453B2C;
+    --text: #F2EAD9;
+    --text-dim: #A99A80;
+    --accent: #C89A6B;
+    --ok: #6B9375;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card{
+    width: 100%;
+    max-width: 400px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 40px 28px;
+    text-align: center;
+  }
+  .check{
+    width: 56px; height: 56px;
+    background: var(--ok);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+  }
+  h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 10px;
+  }
+  p{ color: var(--text-dim); font-size: 14.5px; line-height: 1.6; margin-bottom: 22px; }
+  .pedido-id{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 12px;
+    display: inline-block;
+    margin-bottom: 22px;
+  }
+  a.voltar{
+    display: block;
+    background: var(--accent);
+    color: #1B1812;
+    text-decoration: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">✓</div>
+    <h1>Pedido confirmado</h1>
+    <p>O pagamento foi processado com sucesso. Vamos preparar a tua encomenda em breve.</p>
+    <div class="pedido-id" id="pedidoId">Pedido —</div>
+    <a class="voltar" href="/">Voltar à loja</a>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const pedido = params.get('pedido');
+    if (pedido) {
+      document.getElementById('pedidoId').textContent = 'Referência: ' + pedido;
+    }
+  </script>
+</body>
+</html>
