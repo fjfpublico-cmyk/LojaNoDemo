@@ -384,3 +384,4 @@ ensureSchema()
     console.error('Erro ao preparar a base de dados:', err);
     process.exit(1);
   });
+
