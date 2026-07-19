@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NÓ — Painel de gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1B1812;
+    --surface: #262119;
+    --surface-2: #322B20;
+    --line: #453B2C;
+    --text: #F2EAD9;
+    --text-dim: #A99A80;
+    --accent: #C89A6B;
+    --accent-bright: #E0B98A;
+    --ok: #6B9375;
+    --error: #C9705E;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    padding: 24px 18px 100px;
+  }
+  .top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .logo{ font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; }
+  .logout{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .status{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .dot{ width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+
+  .add-btn{
+    width: 100%;
+    background: var(--accent);
+    color: #1B1812;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+
+  .product-list{ display: flex; flex-direction: column; gap: 10px; }
+  .product-row{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .product-info{ min-width: 0; }
+  .product-cat{
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+  .product-nome{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .product-preco{ font-size: 13px; color: var(--accent-bright); font-weight: 600; }
+  .product-actions{ display: flex; gap: 8px; flex-shrink: 0; }
+  .icon-btn{
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 11px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .icon-btn.delete{ color: var(--error); }
+
+  .empty-state{
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 14px;
+    padding: 40px 0;
+  }
+
+  /* Drawer de formulário — mesmo padrão da loja pública */
+  .overlay{
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 30;
+  }
+  .overlay.open{ opacity: 1; pointer-events: auto; }
+
+  .drawer{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-height: 90vh;
+    background: var(--surface);
+    border-radius: 14px 14px 0 0;
+    border-top: 1px solid var(--line);
+    transform: translateY(100%);
+    transition: transform .25s ease;
+    z-index: 31;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open{ transform: translateY(0); }
+  .drawer-handle{ width: 40px; height: 4px; background: var(--line); border-radius: 4px; margin: 12px auto 4px; }
+  .drawer-header{
+    padding: 12px 22px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer-header h2{ font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+  .drawer-close{ background: none; border: none; color: var(--text-dim); font-size: 13px; cursor: pointer; }
+  .drawer-body{ overflow-y: auto; padding: 18px 22px; flex: 1; }
+
+  label{
+    display: block;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 14px 0 6px;
+  }
+  label:first-child{ margin-top: 0; }
+  input, select, textarea{
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14.5px;
+  }
+  textarea{ resize: vertical; min-height: 60px; }
+  input:focus, select:focus, textarea:focus{ outline: none; border-color: var(--accent); }
+
+  .drawer-footer{ padding: 16px 22px 26px; border-top: 1px solid var(--line); display: flex; gap: 10px; }
+  .btn-primary{
+    flex: 1;
+    background: var(--accent);
+    color: #1B1812;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-secondary{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .form-error{
+    color: var(--error);
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+  .form-error.show{ display: block; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="logo">NÓ · Admin</div>
+    <button class="logout" id="logoutBtn">Sair</button>
+  </div>
+
+  <div class="status"><span class="dot"></span> Sessão de administrador ativa</div>
+
+  <button class="add-btn" id="openAddBtn">+ Adicionar peça</button>
+
+  <div class="product-list" id="productList">
+    <div class="empty-state">A carregar produtos...</div>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <h2 id="drawerTitle">Nova peça</h2>
+      <button class="drawer-close" id="drawerClose">Fechar</button>
+    </div>
+    <div class="drawer-body">
+      <form id="productForm">
+        <label for="fNome">Nome</label>
+        <input type="text" id="fNome" required placeholder="Ex: Pulseira Couro Trançado">
+
+        <label for="fCategoria">Categoria</label>
+        <input type="text" id="fCategoria" required placeholder="Ex: Pulseiras" list="categoriasExistentes">
+        <datalist id="categoriasExistentes"></datalist>
+
+        <label for="fPreco">Preço (€)</label>
+        <input type="number" id="fPreco" required min="0.01" step="0.01" placeholder="Ex: 38.00">
+
+        <label for="fMaterial">Material</label>
+        <select id="fMaterial">
+          <option value="couro">Couro</option>
+          <option value="cordao">Cordão</option>
+          <option value="metal">Metal</option>
+        </select>
+
+        <label for="fNota">Nota (aparece na loja, opcional)</label>
+        <textarea id="fNota" placeholder="Ex: Couro genuíno · fecho em aço escovado"></textarea>
+
+        <p class="form-error" id="formError"></p>
+      </form>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn-secondary" id="cancelBtn">Cancelar</button>
+      <button class="btn-primary" id="saveBtn">Guardar</button>
+    </div>
+  </div>
+
+<script>
+  let PRODUCTS = [];
+  let editingId = null; // null = a criar; string = a editar esse id
+
+  const productList = document.getElementById('productList');
+  const overlay = document.getElementById('overlay');
+  const drawer = document.getElementById('drawer');
+  const drawerTitle = document.getElementById('drawerTitle');
+  const formError = document.getElementById('formError');
+  const categoriasExistentes = document.getElementById('categoriasExistentes');
+
+  function fmt(n){ return Number(n).toFixed(2).replace('.', ',') + '€'; }
+
+  async function carregarProdutos(){
+    const res = await fetch('/api/produtos');
+    PRODUCTS = await res.json();
+    renderList();
+    renderCategoriaSuggestions();
+  }
+
+  function renderCategoriaSuggestions(){
+    const cats = [...new Set(PRODUCTS.map(p => p.categoria))];
+    categoriasExistentes.innerHTML = cats.map(c => `<option value="${c}">`).join('');
+  }
+
+  function renderList(){
+    if(PRODUCTS.length === 0){
+      productList.innerHTML = `<div class="empty-state">Ainda não há produtos. Toca em "+ Adicionar peça".</div>`;
+      return;
+    }
+    productList.innerHTML = PRODUCTS.map(p => `
+      <div class="product-row">
+        <div class="product-info">
+          <div class="product-cat">${p.categoria}</div>
+          <div class="product-nome">${p.nome}</div>
+          <div class="product-preco">${fmt(p.preco)}</div>
+        </div>
+        <div class="product-actions">
+          <button class="icon-btn" data-action="edit" data-id="${p.id}">Editar</button>
+          <button class="icon-btn delete" data-action="delete" data-id="${p.id}">Apagar</button>
+        </div>
+      </div>
+    `).join('');
+
+    productList.querySelectorAll('[data-action="edit"]').forEach(btn => {
+      btn.addEventListener('click', () => abrirEdicao(btn.dataset.id));
+    });
+    productList.querySelectorAll('[data-action="delete"]').forEach(btn => {
+      btn.addEventListener('click', () => apagarProduto(btn.dataset.id));
+    });
+  }
+
+  function abrirDrawer(){ overlay.classList.add('open'); drawer.classList.add('open'); }
+  function fecharDrawer(){
+    overlay.classList.remove('open');
+    drawer.classList.remove('open');
+    formError.classList.remove('show');
+  }
+
+  function limparFormulario(){
+    document.getElementById('fNome').value = '';
+    document.getElementById('fCategoria').value = '';
+    document.getElementById('fPreco').value = '';
+    document.getElementById('fMaterial').value = 'couro';
+    document.getElementById('fNota').value = '';
+  }
+
+  document.getElementById('openAddBtn').addEventListener('click', () => {
+    editingId = null;
+    drawerTitle.textContent = 'Nova peça';
+    limparFormulario();
+    abrirDrawer();
+  });
+
+  function abrirEdicao(id){
+    const p = PRODUCTS.find(x => x.id === id);
+    if(!p) return;
+    editingId = id;
+    drawerTitle.textContent = 'Editar peça';
+    document.getElementById('fNome').value = p.nome;
+    document.getElementById('fCategoria').value = p.categoria;
+    document.getElementById('fPreco').value = p.preco;
+    document.getElementById('fMaterial').value = p.material || 'couro';
+    document.getElementById('fNota').value = p.nota || '';
+    abrirDrawer();
+  }
+
+  async function apagarProduto(id){
+    const p = PRODUCTS.find(x => x.id === id);
+    if(!confirm(`Apagar "${p ? p.nome : id}"? Esta ação não pode ser desfeita.`)) return;
+
+    try {
+      const res = await fetch('/api/admin/produtos/' + encodeURIComponent(id), { method: 'DELETE' });
+      const data = await res.json();
+      if(data.success){
+        await carregarProdutos();
+      } else {
+        alert(data.error || 'Erro ao apagar.');
+      }
+    } catch(err){
+      alert('Erro de ligação ao apagar.');
+    }
+  }
+
+  document.getElementById('overlay').addEventListener('click', fecharDrawer);
+  document.getElementById('drawerClose').addEventListener('click', fecharDrawer);
+  document.getElementById('cancelBtn').addEventListener('click', fecharDrawer);
+
+  document.getElementById('saveBtn').addEventListener('click', async () => {
+    formError.classList.remove('show');
+
+    const nome = document.getElementById('fNome').value.trim();
+    const categoria = document.getElementById('fCategoria').value.trim();
+    const preco = document.getElementById('fPreco').value;
+    const material = document.getElementById('fMaterial').value;
+    const nota = document.getElementById('fNota').value.trim();
+
+    if(!nome || !categoria || !preco){
+      formError.textContent = 'Preenche nome, categoria e preço.';
+      formError.classList.add('show');
+      return;
+    }
+
+    const payload = { nome, categoria, preco, material, nota };
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'A guardar...';
+
+    try {
+      let res;
+      if(editingId){
+        res = await fetch('/api/admin/produtos/' + encodeURIComponent(editingId), {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetch('/api/admin/produtos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+      const data = await res.json();
+
+      if(data.success){
+        fecharDrawer();
+        await carregarProdutos();
+      } else {
+        formError.textContent = data.error || 'Erro ao guardar.';
+        formError.classList.add('show');
+      }
+    } catch(err){
+      formError.textContent = 'Erro de ligação.';
+      formError.classList.add('show');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/login.html';
+  });
+
+  carregarProdutos();
+</script>
+</body>
+</html>
