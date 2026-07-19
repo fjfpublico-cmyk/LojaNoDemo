@@ -1,0 +1,226 @@
+const express = require('express');
+const path = require('path');
+const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
+const session = require('express-session');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Ligação à base de dados Postgres.
+// DATABASE_URL vem de uma variável de ambiente (Railway injeta-a
+// automaticamente quando ligas um plugin Postgres ao projeto).
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('railway')
+    ? { rejectUnauthorized: false }
+    : false
+});
+
+app.use(express.json());
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'chave-temporaria-so-para-desenvolvimento',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 12, // 12 horas
+    secure: false // Railway/Render tratam o HTTPS antes do Node ver o pedido
+  }
+}));
+
+// Middleware que protege rotas de admin — se não tiver sessão válida,
+// devolve 401 (para chamadas de API) ou manda para /login (para páginas)
+function exigirAdmin(req, res, next) {
+  if (req.session && req.session.isAdmin) {
+    return next();
+  }
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Não autenticado.' });
+  }
+  return res.redirect('/login.html');
+}
+
+// Página de admin protegida — TEM de vir antes do express.static,
+// senão os ficheiros estáticos servem o admin.html diretamente e
+// ignoram por completo a proteção de login.
+app.get('/admin.html', exigirAdmin, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Login
+app.post('/api/login', (req, res) => {
+  const { username, password } = req.body;
+  const adminUser = process.env.ADMIN_USER || 'admin';
+  const adminHash = process.env.ADMIN_PASSWORD_HASH;
+
+  if (!adminHash) {
+    console.error('ADMIN_PASSWORD_HASH não está definida nas variáveis de ambiente.');
+    return res.status(500).json({ error: 'Configuração de admin em falta no servidor.' });
+  }
+
+  if (username !== adminUser) {
+    return res.status(401).json({ error: 'Utilizador ou password incorretos.' });
+  }
+
+  const senhaCorreta = bcrypt.compareSync(password || '', adminHash);
+  if (!senhaCorreta) {
+    return res.status(401).json({ error: 'Utilizador ou password incorretos.' });
+  }
+
+  req.session.isAdmin = true;
+  res.json({ success: true });
+});
+
+app.post('/api/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true });
+  });
+});
+
+app.get('/api/me', (req, res) => {
+  res.json({ isAdmin: !!(req.session && req.session.isAdmin) });
+});
+
+// ---------------------------------------------------------------------
+// Catálogo inicial — só é usado para semear a base de dados na primeira
+// vez que o servidor arranca (se a tabela "produtos" estiver vazia).
+// Depois disso, o catálogo real vive só na base de dados.
+// ---------------------------------------------------------------------
+const SEED_PRODUCTS = [
+  { id: 'pulseira-tranca',   nome: 'Pulseira Couro Trançado',  categoria: 'Pulseiras', preco: 38.00, material: 'couro',  nota: 'Couro genuíno · fecho em aço escovado' },
+  { id: 'pulseira-cordao',   nome: 'Pulseira Cordão Duplo',     categoria: 'Pulseiras', preco: 24.00, material: 'cordao', nota: 'Cordão encerado · ajustável' },
+  { id: 'pulseira-no',       nome: 'Pulseira Nó Marinheiro',    categoria: 'Pulseiras', preco: 29.00, material: 'cordao', nota: 'Nó feito à mão · algodão trançado' },
+  { id: 'anel-aro',          nome: 'Anel Aro Fino',             categoria: 'Anéis',     preco: 32.00, material: 'metal',  nota: 'Aço inoxidável · acabamento mate' },
+  { id: 'anel-assimetrico',  nome: 'Anel Assimétrico',          categoria: 'Anéis',     preco: 45.00, material: 'metal',  nota: 'Latão banhado · peça única' },
+  { id: 'anel-camadas',      nome: 'Anel Duplo Camada',         categoria: 'Anéis',     preco: 39.00, material: 'metal',  nota: 'Aço inoxidável · duas camadas sobrepostas' },
+  { id: 'brincos-argola',    nome: 'Brincos Argola Mínima',     categoria: 'Brincos',   preco: 27.00, material: 'metal',  nota: 'Par · aço hipoalergénico' },
+  { id: 'brincos-barra',     nome: 'Brincos Barra Reta',        categoria: 'Brincos',   preco: 25.00, material: 'metal',  nota: 'Par · linha reta minimalista' },
+  { id: 'colar-cera',        nome: 'Colar Cordão de Cera',      categoria: 'Colares',   preco: 34.00, material: 'cordao', nota: 'Cordão de cera · fecho ajustável' },
+  { id: 'colar-placa',       nome: 'Colar Placa Gravável',      categoria: 'Colares',   preco: 48.00, material: 'metal',  nota: 'Aço escovado · espaço para gravação' },
+];
+
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS produtos (
+      id TEXT PRIMARY KEY,
+      nome TEXT NOT NULL,
+      categoria TEXT NOT NULL,
+      preco NUMERIC(10,2) NOT NULL,
+      material TEXT,
+      nota TEXT
+    );
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS pedidos (
+      id TEXT PRIMARY KEY,
+      itens JSONB NOT NULL,
+      total NUMERIC(10,2) NOT NULL,
+      cliente JSONB NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pendente_pagamento',
+      criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
+
+  const { rows } = await pool.query('SELECT COUNT(*) FROM produtos');
+  if (parseInt(rows[0].count, 10) === 0) {
+    for (const p of SEED_PRODUCTS) {
+      await pool.query(
+        'INSERT INTO produtos (id, nome, categoria, preco, material, nota) VALUES ($1,$2,$3,$4,$5,$6)',
+        [p.id, p.nome, p.categoria, p.preco, p.material, p.nota]
+      );
+    }
+    console.log(`Seed: ${SEED_PRODUCTS.length} produtos inseridos na base de dados.`);
+  } else {
+    console.log(`Base de dados já tem ${rows[0].count} produtos — seed ignorado.`);
+  }
+}
+
+// Catálogo público — agora vem da base de dados
+app.get('/api/produtos', async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, nome, categoria, preco::float AS preco, material, nota FROM produtos ORDER BY categoria, nome'
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao carregar produtos:', err);
+    res.status(500).json({ error: 'Erro ao carregar produtos.' });
+  }
+});
+
+// Criar pedido — preço sempre recalculado a partir da base de dados
+app.post('/api/pedidos', async (req, res) => {
+  const { items, cliente } = req.body;
+
+  if (!Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ error: 'Carrinho vazio.' });
+  }
+  if (!cliente || !cliente.nome || !cliente.email) {
+    return res.status(400).json({ error: 'Dados do cliente incompletos.' });
+  }
+
+  try {
+    const { rows: produtosDb } = await pool.query(
+      'SELECT id, nome, preco::float AS preco FROM produtos'
+    );
+
+    let total = 0;
+    const linhasPedido = [];
+
+    for (const item of items) {
+      const produto = produtosDb.find(p => p.id === item.productId);
+      if (!produto) {
+        return res.status(400).json({ error: `Produto inválido: ${item.productId}` });
+      }
+      const qty = Math.max(1, parseInt(item.qty, 10) || 1);
+      const subtotal = Math.round(produto.preco * qty * 100) / 100;
+      total += subtotal;
+
+      linhasPedido.push({
+        productId: produto.id,
+        nome: produto.nome,
+        precoUnitario: produto.preco,
+        qty,
+        subtotal
+      });
+    }
+    total = Math.round(total * 100) / 100;
+
+    const id = 'pedido_' + Date.now();
+    await pool.query(
+      'INSERT INTO pedidos (id, itens, total, cliente, status) VALUES ($1,$2,$3,$4,$5)',
+      [id, JSON.stringify(linhasPedido), total, JSON.stringify(cliente), 'pendente_pagamento']
+    );
+
+    console.log(`Novo pedido: ${id} — ${linhasPedido.length} item(ns) — total ${total}€`);
+
+    res.json({ success: true, pedidoId: id, total, checkoutUrl: null });
+  } catch (err) {
+    console.error('Erro ao criar pedido:', err);
+    res.status(500).json({ error: 'Erro ao criar pedido.' });
+  }
+});
+
+app.get('/api/pedidos', async (req, res) => {
+  try {
+    const { rows } = await pool.query('SELECT * FROM pedidos ORDER BY criado_em DESC');
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao carregar pedidos.' });
+  }
+});
+
+ensureSchema()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Loja a correr em http://localhost:${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Erro ao preparar a base de dados:', err);
+    process.exit(1);
+  });
