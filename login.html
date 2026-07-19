@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NÓ — Acesso ao painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1B1812;
+    --surface: #262119;
+    --line: #453B2C;
+    --text: #F2EAD9;
+    --text-dim: #A99A80;
+    --accent: #C89A6B;
+    --accent-bright: #E0B98A;
+    --error: #C9705E;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card{
+    width: 100%;
+    max-width: 360px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 32px 26px;
+  }
+  .logo{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .subtitle{
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 26px;
+  }
+  label{
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    margin-top: 16px;
+  }
+  input{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 13px 14px;
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 15px;
+  }
+  input:focus{ outline: none; border-color: var(--accent); }
+  button{
+    width: 100%;
+    background: var(--accent);
+    color: #1B1812;
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    margin-top: 22px;
+    cursor: pointer;
+  }
+  button:disabled{ opacity: 0.6; }
+  .error{
+    color: var(--error);
+    font-size: 13px;
+    margin-top: 14px;
+    display: none;
+  }
+  .error.show{ display: block; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">NÓ</div>
+    <div class="subtitle">Painel de gestão — acesso restrito</div>
+
+    <form id="loginForm">
+      <label for="username">Utilizador</label>
+      <input type="text" id="username" autocomplete="username" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" autocomplete="current-password" required>
+
+      <button type="submit" id="submitBtn">Entrar</button>
+      <p class="error" id="errorMsg"></p>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const errorMsg = document.getElementById('errorMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMsg.classList.remove('show');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'A entrar...';
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          window.location.href = '/admin.html';
+        } else {
+          errorMsg.textContent = data.error || 'Erro ao entrar.';
+          errorMsg.classList.add('show');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Entrar';
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Erro de ligação. Tenta novamente.';
+        errorMsg.classList.add('show');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Entrar';
+      }
+    });
+  </script>
+</body>
+</html>

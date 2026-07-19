@@ -1,0 +1,15 @@
+{
+  "name": "aurea-joalharia-demo",
+  "version": "1.0.0",
+  "description": "Demo de loja online de joias com carrinho e pagamento (cartao + MB WAY) via Stripe",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^4.19.2",
+    "express-session": "^1.19.0",
+    "pg": "^8.22.0"
+  }
+}

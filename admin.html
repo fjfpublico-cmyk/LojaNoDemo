@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NÓ — Painel de gestão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1B1812;
+    --surface: #262119;
+    --line: #453B2C;
+    --text: #F2EAD9;
+    --text-dim: #A99A80;
+    --accent: #C89A6B;
+    --ok: #6B9375;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+  .top{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+  }
+  .logo{ font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; }
+  .logout{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text-dim);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .status{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .dot{ width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+  h1{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    margin-bottom: 12px;
+  }
+  p{ color: var(--text-dim); font-size: 14.5px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="logo">NÓ · Admin</div>
+    <button class="logout" id="logoutBtn">Sair</button>
+  </div>
+
+  <div class="status"><span class="dot"></span> Sessão de administrador ativa</div>
+
+  <h1>Painel de gestão de produtos</h1>
+  <p>Esta é a base do painel — o login já está a funcionar e protegido. O formulário para adicionar, editar e apagar produtos entra na próxima etapa.</p>
+
+  <script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      window.location.href = '/login.html';
+    });
+  </script>
+</body>
+</html>
