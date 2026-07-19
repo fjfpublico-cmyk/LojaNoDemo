@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NÓ — Peças conceituais em couro, cordão e metal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #1B1812;
+    --surface: #262119;
+    --surface-2: #322B20;
+    --line: #453B2C;
+    --text: #F2EAD9;
+    --text-dim: #A99A80;
+    --accent: #C89A6B;
+    --accent-bright: #E0B98A;
+    --ok: #6B9375;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+  html{ scroll-behavior: smooth; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 90px;
+  }
+  .wrap{ max-width: 520px; margin: 0 auto; padding: 0 18px; }
+
+  nav{
+    position: sticky; top: 0;
+    background: rgba(27,24,18,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--line);
+    z-index: 15;
+  }
+  .nav-inner{
+    max-width: 520px; margin: 0 auto;
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .nav-links{ display: flex; gap: 18px; font-size: 12px; letter-spacing: 0.03em; }
+  .nav-links a{ color: var(--text-dim); text-decoration: none; }
+
+  header.hero{
+    padding: 44px 0 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-art{
+    position: absolute;
+    top: -60px; right: -90px;
+    width: 340px; height: 340px;
+    opacity: 0.16;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-art svg{ width: 100%; height: 100%; fill: none; stroke: var(--accent-bright); stroke-width: 1.4; }
+
+  .eyebrow{
+    position: relative; z-index: 1;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  h1{
+    position: relative; z-index: 1;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 40px;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    max-width: 320px;
+    color: var(--text);
+  }
+  .hero-sub{
+    position: relative; z-index: 1;
+    margin-top: 14px;
+    font-size: 14.5px;
+    color: var(--text-dim);
+    max-width: 320px;
+    line-height: 1.55;
+  }
+
+  .section-title{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::after{ content:""; flex:1; height:1px; background: var(--line); }
+
+  .cat-filters{
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 2px 0 22px;
+    scrollbar-width: none;
+  }
+  .cat-filters::-webkit-scrollbar{ display: none; }
+  .cat-chip{
+    flex: 0 0 auto;
+    padding: 8px 15px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .15s ease;
+  }
+  .cat-chip.active{
+    background: var(--accent);
+    color: #1B1812;
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 44px;
+  }
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .15s ease;
+  }
+  .card:hover{ border-color: var(--accent); }
+  .swatch{
+    width: 100%;
+    height: 140px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .swatch svg{ width: 32px; height: 32px; position: relative; z-index: 1; fill: none; stroke-width: 1.6; }
+  .swatch.couro{ background: linear-gradient(135deg,#7A5030,#5A3A20); }
+  .swatch.couro::before{
+    content:"";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(115deg, rgba(0,0,0,0.18) 0 2px, transparent 2px 7px);
+  }
+  .swatch.couro svg{ stroke: rgba(255,255,255,0.92); }
+  .swatch.cordao{ background: linear-gradient(135deg,#413A31,#2A251E); }
+  .swatch.cordao::before{
+    content:"";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(70deg, rgba(255,255,255,0.08) 0 1px, transparent 1px 5px);
+  }
+  .swatch.cordao svg{ stroke: var(--accent-bright); }
+  .swatch.metal{ background: linear-gradient(135deg, #C9AE87, #8F7A5C); }
+  .swatch.metal svg{ stroke: #211C14; }
+
+  .card .cat{
+    font-size: 9.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 5px;
+  }
+  .card h3{
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    line-height: 1.25;
+    margin-bottom: 5px;
+    min-height: 36px;
+    color: var(--text);
+  }
+  .card .nota{
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    line-height: 1.4;
+    min-height: 28px;
+  }
+  .card .price{
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--accent-bright);
+  }
+  .add-btn{
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent-bright);
+    border-radius: 3px;
+    padding: 9px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 500;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: background .15s ease, color .15s ease;
+  }
+  .add-btn:active{ background: var(--accent); color: #1B1812; }
+  .add-btn.added{ background: var(--ok); border-color: var(--ok); color: #fff; }
+
+  .about{ padding: 8px 0 40px; }
+  .about p{ font-size: 14.5px; line-height: 1.65; color: var(--text-dim); margin-bottom: 14px; }
+  .about p:last-child{ margin-bottom: 0; }
+  .about strong{ color: var(--text); font-weight: 600; }
+
+  .contact{ padding-bottom: 40px; }
+  .contact-row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .contact-row:last-child{ border-bottom: none; }
+  .contact-row .label{ color: var(--text-dim); }
+  .contact-row a{ color: var(--accent-bright); text-decoration: none; font-weight: 500; }
+
+  footer{
+    padding: 28px 0 14px;
+    border-top: 1px solid var(--line);
+    margin-top: 10px;
+  }
+  .footer-top{ display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+  .footer-logo{ font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; color: var(--text); }
+  .footer-nav{ display: flex; flex-direction: column; gap: 8px; text-align: right; font-size: 12px; }
+  .footer-nav a{ color: var(--text-dim); text-decoration: none; }
+  .footer-fine{ font-size: 10.5px; color: var(--text-dim); letter-spacing: 0.03em; }
+
+  .cart-fab{
+    position: fixed;
+    bottom: 20px; left: 18px; right: 18px;
+    max-width: 484px;
+    margin: 0 auto;
+    background: var(--accent);
+    color: #1B1812;
+    border: none;
+    border-radius: 6px;
+    padding: 16px 22px;
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 20;
+  }
+  .cart-fab.visible{ display: flex; }
+  .cart-fab .count{
+    background: #1B1812;
+    color: var(--accent-bright);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center; justify-content: center;
+    font-size: 11px;
+    margin-right: 8px;
+  }
+
+  .overlay{
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 30;
+  }
+  .overlay.open{ opacity: 1; pointer-events: auto; }
+
+  .drawer{
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    max-height: 86vh;
+    background: var(--surface);
+    border-radius: 14px 14px 0 0;
+    border-top: 1px solid var(--line);
+    transform: translateY(100%);
+    transition: transform .25s ease;
+    z-index: 31;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open{ transform: translateY(0); }
+  .drawer-handle{ width: 40px; height: 4px; background: var(--line); border-radius: 4px; margin: 12px auto 4px; }
+  .drawer-header{
+    padding: 12px 22px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 1px solid var(--line);
+  }
+  .drawer-header h2{ font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+  .drawer-close{ background: none; border: none; color: var(--text-dim); font-size: 13px; cursor: pointer; }
+  .drawer-body{ overflow-y: auto; padding: 14px 22px; flex: 1; }
+  .cart-line{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    gap: 10px;
+  }
+  .cart-line .cl-name{ font-size: 13.5px; margin-bottom: 4px; font-weight: 500; color: var(--text); }
+  .cart-line .cl-price{ font-size: 11.5px; color: var(--text-dim); }
+  .qty-ctrl{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-2);
+    border-radius: 100px;
+    padding: 4px 8px;
+  }
+  .qty-ctrl button{ background: none; border: none; color: var(--accent-bright); font-size: 16px; width: 22px; height: 22px; cursor: pointer; }
+  .qty-ctrl span{ font-size: 13px; min-width: 14px; text-align: center; color: var(--text); }
+
+  .drawer-empty{ text-align: center; color: var(--text-dim); font-size: 13.5px; padding: 40px 0; }
+
+  .client-fields{ padding-top: 6px; }
+  .client-fields label{
+    display: block;
+    font-size: 10.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 14px 0 6px;
+  }
+  .client-fields input{
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 14px;
+  }
+  .client-fields input:focus{ outline: none; border-color: var(--accent); }
+
+  .drawer-footer{ padding: 16px 22px 26px; border-top: 1px solid var(--line); }
+  .total-row{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+  .total-row .label{ font-size: 12.5px; color: var(--text-dim); }
+  .total-row .amount{ font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: var(--accent-bright); }
+  .checkout-btn{
+    width: 100%;
+    background: var(--accent);
+    color: #1B1812;
+    border: none;
+    border-radius: 6px;
+    padding: 16px;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+  }
+  .checkout-btn:disabled{ background: var(--surface-2); color: var(--text-dim); }
+  .pay-note{ text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 10px; }
+  .pay-note b{ color: var(--accent-bright); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo">NÓ</div>
+    <div class="nav-links">
+      <a href="#colecao">Coleção</a>
+      <a href="#sobre">Sobre</a>
+      <a href="#contacto">Contacto</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 300 300">
+        <ellipse cx="150" cy="155" rx="118" ry="128" transform="rotate(-10 150 155)"/>
+        <path d="M60 95 Q40 130 55 160 Q30 175 48 205"/>
+        <path d="M75 80 Q55 118 70 150"/>
+        <circle cx="150" cy="27" r="7"/>
+      </svg>
+    </div>
+    <div class="eyebrow">Estúdio de Acessórios</div>
+    <h1>Objetos para o corpo, não jóias.</h1>
+    <p class="hero-sub">Peças conceituais em couro, cordão e metal — desenhadas para todos os corpos, sem género definido.</p>
+  </header>
+
+  <div id="colecao">
+    <div class="cat-filters" id="catFilters"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <section id="sobre">
+    <div class="section-title">Sobre a NÓ</div>
+    <div class="about">
+      <p><strong>A NÓ nasce de um gesto simples:</strong> atar. Um cordão à volta do pulso, um nó que fecha um colar, uma peça de metal que não pergunta se é para homem ou mulher — só pergunta se serve ao corpo que a usa.</p>
+      <p>Trabalhamos com <strong>couro genuíno, cordão encerado e metais de acabamento mate</strong> — materiais crus, sem brilho excessivo, pensados para o uso diário e não para ficar guardados numa caixa.</p>
+      <p>Cada peça é produzida em pequenos lotes. Sem género, sem ocasião certa — só objetos bem feitos.</p>
+    </div>
+  </section>
+
+  <section id="contacto">
+    <div class="section-title">Contacto</div>
+    <div class="contact">
+      <div class="contact-row">
+        <span class="label">Email</span>
+        <a href="mailto:ola@no-studio.pt">ola@no-studio.pt</a>
+      </div>
+      <div class="contact-row">
+        <span class="label">WhatsApp</span>
+        <a href="https://wa.me/351900000000">+351 900 000 000</a>
+      </div>
+      <div class="contact-row">
+        <span class="label">Localização</span>
+        <span>Lisboa, Portugal</span>
+      </div>
+      <div class="contact-row">
+        <span class="label">Instagram</span>
+        <a href="#">@no.studio.pt</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-top">
+      <div class="footer-logo">NÓ</div>
+      <div class="footer-nav">
+        <a href="#colecao">Coleção</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contacto">Contacto</a>
+      </div>
+    </div>
+    <div class="footer-fine">NÓ Studio · Demonstração de loja + pagamento · Envios para todo o país</div>
+  </footer>
+</div>
+
+<button class="cart-fab" id="cartFab">
+  <span><span class="count" id="cartCount">0</span>Ver carrinho</span>
+  <span id="cartTotalFab">0,00€</span>
+</button>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-header">
+    <h2>O seu carrinho</h2>
+    <button class="drawer-close" id="drawerClose">Fechar</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+  <div class="drawer-footer">
+    <div class="total-row">
+      <span class="label">Total</span>
+      <span class="amount" id="totalAmount">0,00€</span>
+    </div>
+    <button class="checkout-btn" id="checkoutBtn" disabled>Adicione peças ao carrinho</button>
+    <p class="pay-note">Pagamento seguro via <b>Cartão ou MB WAY</b></p>
+  </div>
+</div>
+
+<script>
+  let PRODUCTS = [];
+  let cart = {};
+  let activeCategory = 'Todas';
+
+  const grid = document.getElementById('grid');
+  const catFilters = document.getElementById('catFilters');
+  const cartFab = document.getElementById('cartFab');
+  const cartCount = document.getElementById('cartCount');
+  const cartTotalFab = document.getElementById('cartTotalFab');
+  const overlay = document.getElementById('overlay');
+  const drawer = document.getElementById('drawer');
+  const drawerBody = document.getElementById('drawerBody');
+  const totalAmount = document.getElementById('totalAmount');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+
+  const ICONS = {
+    'Pulseiras': '<svg viewBox="0 0 24 24"><path d="M6 12a6 6 0 0 1 12 0 6 6 0 0 1-12 0Z"/><path d="M6 12H3M21 12h-3"/></svg>',
+    'Anéis': '<svg viewBox="0 0 24 24"><circle cx="12" cy="14" r="6"/><path d="M9 8l3-5 3 5"/></svg>',
+    'Brincos': '<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="2.5"/><path d="M12 9.5v6a3 3 0 0 0 3 3"/></svg>',
+    'Colares': '<svg viewBox="0 0 24 24"><path d="M4 4c0 6 3.5 10 8 10s8-4 8-10"/><circle cx="12" cy="16" r="2.2"/></svg>'
+  };
+
+  function fmt(n){ return n.toFixed(2).replace('.', ',') + '€'; }
+
+  async function init(){
+    // Se a página já veio com os produtos escritos pelo servidor
+    // (renderização no servidor), usa-os diretamente — evita um pedido
+    // extra à rede. Só vai buscar via API se, por algum motivo, isso
+    // não estiver disponível (ex: página aberta de outra forma).
+    if (window.__PRODUCTS__) {
+      PRODUCTS = window.__PRODUCTS__;
+    } else {
+      const res = await fetch('/api/produtos');
+      PRODUCTS = await res.json();
+    }
+    renderFilters();
+    renderGrid();
+  }
+
+  function renderFilters(){
+    const cats = ['Todas', ...new Set(PRODUCTS.map(p => p.categoria))];
+    catFilters.innerHTML = cats.map(c =>
+      `<div class="cat-chip ${c === activeCategory ? 'active' : ''}" data-cat="${c}">${c}</div>`
+    ).join('');
+    catFilters.querySelectorAll('.cat-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        activeCategory = chip.dataset.cat;
+        renderFilters();
+        renderGrid();
+      });
+    });
+  }
+
+  function renderGrid(){
+    const list = activeCategory === 'Todas' ? PRODUCTS : PRODUCTS.filter(p => p.categoria === activeCategory);
+    grid.innerHTML = list.map(p => `
+      <div class="card">
+        <div class="swatch ${p.material}">${p.imagem_url ? `<img src="${p.imagem_url}" alt="${p.nome}" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;border-radius:4px;position:relative;z-index:1;">` : (ICONS[p.categoria] || '')}</div>
+        <div class="cat">${p.categoria}</div>
+        <h3>${p.nome}</h3>
+        <div class="nota">${p.nota || ''}</div>
+        <div class="price">${fmt(p.preco)}</div>
+        <button class="add-btn" data-id="${p.id}">Adicionar</button>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.add-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        cart[id] = (cart[id] || 0) + 1;
+        btn.textContent = 'Adicionado ✓';
+        btn.classList.add('added');
+        setTimeout(() => {
+          btn.textContent = 'Adicionar';
+          btn.classList.remove('added');
+        }, 900);
+        updateCartUI();
+      });
+    });
+  }
+
+  function cartItemsList(){
+    return Object.entries(cart)
+      .filter(([id, qty]) => qty > 0)
+      .map(([id, qty]) => ({ produto: PRODUCTS.find(p => p.id === id), qty }));
+  }
+
+  function cartTotal(){
+    return cartItemsList().reduce((sum, i) => sum + i.produto.preco * i.qty, 0);
+  }
+
+  function updateCartUI(){
+    const items = cartItemsList();
+    const count = items.reduce((s, i) => s + i.qty, 0);
+    const total = cartTotal();
+
+    cartFab.classList.toggle('visible', count > 0);
+    cartCount.textContent = count;
+    cartTotalFab.textContent = fmt(total);
+    totalAmount.textContent = fmt(total);
+
+    renderDrawerBody(items);
+
+    const nome = document.getElementById('clNome');
+    const email = document.getElementById('clEmail');
+    const formOk = nome && email && nome.value.trim() && email.value.trim();
+    checkoutBtn.disabled = !(count > 0 && formOk);
+    checkoutBtn.textContent = count > 0 ? `Finalizar compra · ${fmt(total)}` : 'Adicione peças ao carrinho';
+  }
+
+  function renderDrawerBody(items){
+    if(items.length === 0){
+      drawerBody.innerHTML = `<div class="drawer-empty">O seu carrinho está vazio.<br>Explore a coleção e adicione peças.</div>`;
+      return;
+    }
+
+    const linesHtml = items.map(({produto, qty}) => `
+      <div class="cart-line">
+        <div>
+          <div class="cl-name">${produto.nome}</div>
+          <div class="cl-price">${fmt(produto.preco)} cada</div>
+        </div>
+        <div class="qty-ctrl">
+          <button data-action="dec" data-id="${produto.id}">−</button>
+          <span>${qty}</span>
+          <button data-action="inc" data-id="${produto.id}">+</button>
+        </div>
+      </div>
+    `).join('');
+
+    drawerBody.innerHTML = linesHtml + `
+      <div class="client-fields">
+        <label for="clNome">Nome</label>
+        <input type="text" id="clNome" placeholder="Nome completo" value="${window.__clNome || ''}">
+        <label for="clEmail">Email</label>
+        <input type="email" id="clEmail" placeholder="email@exemplo.com" value="${window.__clEmail || ''}">
+        <label for="clTelefone">Telemóvel</label>
+        <input type="tel" id="clTelefone" placeholder="+351 9XX XXX XXX" value="${window.__clTelefone || ''}">
+      </div>
+    `;
+
+    drawerBody.querySelectorAll('.qty-ctrl button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        if(btn.dataset.action === 'inc') cart[id]++;
+        else cart[id] = Math.max(0, cart[id] - 1);
+        updateCartUI();
+      });
+    });
+
+    ['clNome','clEmail','clTelefone'].forEach(fid => {
+      const el = document.getElementById(fid);
+      el.addEventListener('input', () => {
+        window['__' + fid] = el.value;
+        updateCartUI();
+      });
+    });
+  }
+
+  function openDrawer(){ overlay.classList.add('open'); drawer.classList.add('open'); }
+  function closeDrawer(){ overlay.classList.remove('open'); drawer.classList.remove('open'); }
+
+  cartFab.addEventListener('click', openDrawer);
+  overlay.addEventListener('click', closeDrawer);
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+
+  checkoutBtn.addEventListener('click', async () => {
+    const items = cartItemsList().map(i => ({ productId: i.produto.id, qty: i.qty }));
+    const cliente = {
+      nome: document.getElementById('clNome').value,
+      email: document.getElementById('clEmail').value,
+      telefone: document.getElementById('clTelefone').value
+    };
+
+    checkoutBtn.disabled = true;
+    checkoutBtn.textContent = 'A processar...';
+
+    try {
+      const res = await fetch('/api/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items, cliente })
+      });
+      const data = await res.json();
+
+      if(data.checkoutUrl){
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert(`Pedido criado (${data.pedidoId}). Total: ${fmt(data.total)}.\n(Pagamento ainda não está ligado nesta etapa.)`);
+        cart = {};
+        updateCartUI();
+        closeDrawer();
+      }
+    } catch(err){
+      alert('Erro ao criar pedido: ' + err.message);
+      updateCartUI();
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>
